@@ -1,0 +1,8 @@
+services:
+  sentiment-api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      ENCODER_PATH: /app/models/sentence_transformer.model
+      CLASSIFIER_PATH: /app/models/classifier.joblib

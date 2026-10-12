@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 import joblib
+import torch
 from sentence_transformers import SentenceTransformer
 
 Sentiment = Literal["negative", "neutral", "positive"]
@@ -35,7 +36,9 @@ class SentimentPredictor:
         classifier = load_classifier(classifier_path)
 
         encoder = SentenceTransformer(
-            str(encoder_path), device="mps", local_files_only=True
+            str(encoder_path),
+            device="mps" if torch.backends.mps.is_available() else "cpu",
+            local_files_only=True,
         )
         return cls(encoder, classifier)
 
