@@ -7,3 +7,5 @@ __pycache__/
 
 # Model Files
 models/
+
+.DS_Store
