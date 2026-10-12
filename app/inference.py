@@ -1,15 +1,15 @@
-import os
 from pathlib import Path
 from typing import Any, Literal
 
 import joblib
+from sentence_transformers import SentenceTransformer
 
 Sentiment = Literal["negative", "neutral", "positive"]
 LABELS: dict[int, Sentiment] = {0: "negative", 1: "neutral", 2: "positive"}
 MODEL_DIRECTORY = Path(__file__).resolve().parent.parent / "models"
 
 
-def load_classifier(path: Path, file_format: str) -> Any:
+def load_classifier(path: Path) -> Any:
     """Load a trusted classifier using the serializer that created it."""
     if not path.is_file():
         raise FileNotFoundError(f"Classifier file not found: {path}")
@@ -24,24 +24,18 @@ class SentimentPredictor:
 
     @classmethod
     def load(cls) -> "SentimentPredictor":
-        encoder_path = Path(
-            os.getenv("ENCODER_PATH", str(MODEL_DIRECTORY / "sentence_transformer"))
-        )
-        classifier_path = Path(
-            os.getenv("CLASSIFIER_PATH", str(MODEL_DIRECTORY / "classifier.joblib"))
-        )
+
+        encoder_path = MODEL_DIRECTORY / "sentence_transformer.model"
+        classifier_path = MODEL_DIRECTORY / "classifier.joblib"
+
         if not encoder_path.is_dir():
             raise FileNotFoundError(
                 f"Sentence Transformer directory not found: {encoder_path}"
             )
-        classifier = load_classifier(
-            classifier_path, os.getenv("CLASSIFIER_FORMAT", "joblib")
-        )
-        # Import when loading so unit tests need no transformer weights.
-        from sentence_transformers import SentenceTransformer
+        classifier = load_classifier(classifier_path)
 
         encoder = SentenceTransformer(
-            str(encoder_path), device="cpu", local_files_only=True
+            str(encoder_path), device="mps", local_files_only=True
         )
         return cls(encoder, classifier)
 
